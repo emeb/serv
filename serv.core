@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::serv:1.2.0
+name : ::serv:1.3.0
 
 filesets:
   core:
@@ -18,6 +18,7 @@ filesets:
       - rtl/serv_rf_ram_if.v
       - rtl/serv_rf_ram.v
       - rtl/serv_state.v
+      - rtl/serv_debug.v
       - rtl/serv_top.v
       - rtl/serv_rf_top.v
       - rtl/serv_aligner.v
@@ -41,11 +42,14 @@ targets:
       - RISCV_FORMAL
       - SERV_CLEAR_RAM
       - "is_toplevel? (WITH_CSR)"
+      - "is_toplevel? (W)"
     toplevel : ["is_toplevel? (serv_rf_top)"]
 
   lint:
     default_tool : verilator
+    description: Run static code checks (linting)
     filesets : [core]
+    parameters: [W]
     tools:
       verilator:
         mode : lint-only
@@ -55,6 +59,7 @@ targets:
 
   sky130:
     default_tool : openlane
+    description: Create GDSII for SkyWater 130nm using OpenLANE
     filesets : [core, openlane]
     toplevel : serv_synth_wrapper
 
@@ -94,4 +99,9 @@ parameters:
     datatype    : int
     paramtype   : vlogparam
     description : Enable/Disable the support of misaligned instructions
+
+  W:
+    datatype    : int
+    description : Internal datapath width (1=SERV, 4=QERV)
+    paramtype   : vlogparam
 

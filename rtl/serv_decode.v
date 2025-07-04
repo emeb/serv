@@ -15,7 +15,6 @@ module serv_decode
    output reg       o_ebreak,
    output reg       o_branch_op,
    output reg       o_shift_op,
-   output reg       o_slt_or_branch,
    output reg       o_rd_op,
    output reg       o_two_stage_op,
    output reg       o_dbus_en,
@@ -79,10 +78,9 @@ module serv_decode
 	~opcode[2] | (funct3[0] & ~funct3[1] & ~opcode[0] & ~opcode[4]) |
 	(funct3[1] & ~funct3[2] & ~opcode[0] & ~opcode[4]) | co_mdu_op;
    wire co_shift_op = (opcode[2] & ~funct3[1]) & !co_mdu_op;
-   wire co_slt_or_branch = (opcode[4] | (funct3[1] & opcode[2]) | (imm30 & opcode[2] & opcode[3] & ~funct3[2])) & !co_mdu_op;
    wire co_branch_op = opcode[4];
    wire co_dbus_en    = ~opcode[2] & ~opcode[4];
-   wire co_mtval_pc   = opcode[4];   
+   wire co_mtval_pc   = opcode[4];
    wire co_mem_word   = funct3[1];
    wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
    wire co_rd_mem_en  = (!opcode[2] & !opcode[0]) | co_mdu_op;
@@ -188,7 +186,7 @@ module serv_decode
    wire co_rd_csr_en = csr_op;
 
    wire co_csr_en         = csr_op & csr_valid;
-   wire co_csr_mstatus_en = csr_op & !op26 & !op22;
+   wire co_csr_mstatus_en = csr_op & !op26 & !op22 & !op20;
    wire co_csr_mie_en     = csr_op & !op26 &  op22 & !op20;
    wire co_csr_mcause_en  = csr_op         &  op21 & !op20;
 
@@ -233,7 +231,7 @@ module serv_decode
    wire co_op_b_source = opcode[3];
 
    generate
-      if (PRE_REGISTER) begin
+      if (PRE_REGISTER) begin : gen_pre_register
 
          always @(posedge clk) begin
             if (i_wb_en) begin
@@ -259,7 +257,6 @@ module serv_decode
             o_ebreak           = co_ebreak;
             o_branch_op        = co_branch_op;
             o_shift_op         = co_shift_op;
-            o_slt_or_branch    = co_slt_or_branch;
             o_rd_op            = co_rd_op;
             o_mdu_op           = co_mdu_op;
             o_ext_funct3       = co_ext_funct3;
@@ -296,7 +293,7 @@ module serv_decode
             o_rd_mem_en        = co_rd_mem_en;
          end
 
-      end else begin
+      end else begin : gen_post_register
 
          always @(*) begin
             funct3  = i_wb_rdt[14:12];
@@ -321,7 +318,6 @@ module serv_decode
                o_mtval_pc         <= co_mtval_pc;
                o_branch_op        <= co_branch_op;
                o_shift_op         <= co_shift_op;
-               o_slt_or_branch    <= co_slt_or_branch;
                o_rd_op            <= co_rd_op;
                o_mdu_op           <= co_mdu_op;
                o_ext_funct3       <= co_ext_funct3;

@@ -2,52 +2,102 @@
 
 # SERV
 
-[![LibreCores](https://www.librecores.org/olofk/serv/badge.svg?style=flat)](https://www.librecores.org/olofk/serv)
 [![Join the chat at https://gitter.im/librecores/serv](https://badges.gitter.im/librecores/serv.svg)](https://gitter.im/librecores/serv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![CI status](https://github.com/olofk/serv/workflows/CI/badge.svg)](https://github.com/olofk/serv/actions?query=workflow%3ACI)
+[![Compliance tests](https://github.com/olofk/serv/actions/workflows/ci.yml/badge.svg)](https://github.com/olofk/serv/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/serv/badge/?version=latest)](https://serv.readthedocs.io/en/latest/?badge=latest)
 
 SERV is an award-winning bit-serial RISC-V core
 
+In fact, the award-winning SERV is the world's smallest RISC-V CPU. It's the perfect companion whenever you need a bit of computation and silicon real estate is at a premium.
+
+How small is it then? Synthesizing the latest version of SERV in its most minimal form, yields the following results for some popular FPGA architectures and a typical CMOS process.
+
+| Lattice iCE40 | Intel Cyclone 10LP | AMD Artix-7 | CMOS   |
+| ------------- | ------------------ | ----------- | ------ |
+| 198 LUT       | 239 LUT            | 125 LUT     | 2.1kGE |
+| 164 FF        | 164 FF             | 164 FF      |        |
+
+
 If you want to know more about SERV, what a bit-serial CPU is and what it's good for, I recommend starting out by watching the fantastic short SERV movies
 * [introduction to SERV](https://www.award-winning.me/serv-introduction/)
 * [SERV : RISC-V for a fistful of gates](https://www.award-winning.me/serv-for-a-fistful-of-gates/)
+* [SERV: 32-bit is the New 8-bit](https://www.award-winning.me/serv-32-bit-is-the-new-8-bit/)
 * [Bit by bit - How to fit 8 RISC V cores in a $38 FPGA board (presentation from the Zürich 2019 RISC-V workshop)](https://www.youtube.com/watch?v=xjIxORBRaeQ)
 
-There's also an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with fancy block diagrams, timing diagrams and an in-depth description of how some things work.
+All SERV videos and more can also be found [here](https://www.award-winning.me/videos/).
 
-## Prerequisites
+Apart from being the world's smallest RISC-V CPU, SERV also aims at being the best documented RISC-V CPU. For this there is an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with block diagrams that are correct to the gate-level, cycle-accurate timing diagrams and an in-depth description of how things work.
 
-Create a directory to keep all the different parts of the project together. We
-will refer to this directory as `$WORKSPACE` from now on. All commands will be run from this directory unless otherwise stated.
+## Systems using SERV
 
-Install FuseSoC
+SERV can be easily integrated into any design, but if you are looking at just quickly trying it out, here is a list of some systems that are already using SERV:
 
-`pip install fusesoc`
+[Servant](https://serv.readthedocs.io/en/latest/servant.html) is the reference platform for SERV. It is a very basic SoC that contains just enough runs Zephyr RTOS. Servant is intended for FPGAs and has been ported to around 20 different FPGA boards. It is also used to run the RISC-V regression test suite.
 
-Add the FuseSoC standard library
+[CoreScore](https://corescore.store/) is an award-giving benchmark for FPGAs and their synthesis/P&R tools. It tests how many SERV cores that can be put into a particular FPGA.
 
-`fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores`
+[Observer](https://github.com/olofk/observer) is a configurable and software-programmable sensor aggregation platform for heterogeneous sensors.
 
-The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
+[Subservient](https://github.com/olofk/subservient/) is a small technology-independent SERV-based SoC intended for ASIC implementations together with a single-port SRAM.
 
-`fusesoc library add serv https://github.com/olofk/serv`
+[Litex](https://github.com/enjoy-digital/litex) is a Python-based framework for creating FPGA SoCs. SERV is one of the 30+ supported cores. A Litex-generated SoC has been used to run DooM on SERV.
 
-The SERV repo will now be available in $WORKSPACE/fusesoc_libraries/serv. To save some typing, we will refer to that directory as `$SERV`.
 
-We are now ready to do our first exercises with SERV
 
-If [Verilator](https://www.veripool.org/wiki/verilator) is installed, we can use that as a linter to check the SERV source code
 
-`fusesoc run --target=lint serv`
+## Getting started
+
+:o: Create a root directory to keep all the different parts of the project together. We
+will refer to this directory as `$WORKSPACE` from now on.
+
+    $ export WORKSPACE=$(pwd)
+
+All the following commands will be run from this directory unless otherwise stated.
+- Install FuseSoC
+
+        $ pip install fusesoc
+- Add the FuseSoC standard library 
+
+        $ fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores
+- The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
+
+
+        $ fusesoc library add serv https://github.com/olofk/serv
+    >:warning: The SERV repo will now be available in `$WORKSPACE/fusesoc_libraries/serv`. We will refer to that directory as `$SERV`.
+- Install latest version of [Verilator](https://www.veripool.org/wiki/verilator)
+- (Optional) To support RISC-V M-extension extension, Multiplication and Division unit (MDU) can be added included into the SERV as a separate library.
+
+        $ fusesoc library add mdu https://github.com/zeeshanrafique23/mdu
+    MDU will be available in `$WORKSPACE/fusesoc_libraries/mdu`
+
+We are now ready to do our first exercises with SERV. If everything above is done correctly,we can use Verilator as a linter to check the SERV source code.
+
+    $ fusesoc run --target=lint serv
 
 If everything worked, the output should look like
 
-    INFO: Preparing ::serv:1.2.0
+    INFO: Preparing ::serv:1.3.0
     INFO: Setting up project
 
     INFO: Building simulation model
     INFO: Running
+
+After performing all the steps that are mentioned above, the directory structure from the `$WORKSPACE` should look like this:
+
+    .
+    $WORKSPACE
+    |
+    ├── build
+    │   └── ...
+    ├── fusesoc.conf
+    └── fusesoc_libraries
+        ├── fusesoc_cores
+        │   └── ...
+        ├── mdu
+        │   └── ...
+        └── serv
+            └── ...
+
 
 ## Running pre-built test software
 
@@ -72,167 +122,19 @@ For a more advanced example, we can also run the Dining philosophers demo
 
     fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_sync.hex --memsize=16384
 
-Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in `$SERV/sw`
+...or... the blinky example (note that the ```uart_baudrate``` should not be defined for the blinky test)
 
-## Run RISC-V compliance tests
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/blinky.hex --memsize=16384
 
-Build the verilator model (if not already done)
 
-    fusesoc run --target=verilator_tb --build servant --memsize=8388608
 
-To build the verilator model with MDU (for M extension compliance tests):
+If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is installed, other applications can be tested by compiling the assembly program and converting to bin and then hex with makehex.py found in [`$SERV/sw`](/sw/). 
 
-    fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
+:bulb:RISC-V Compressed Extension can be enabled by passing `--compressed=1` parameter. 
 
-To build the verilator model with C extension (for Compressed extension compliance tests):
+## Verification
+SERV is verified using RISC-V compliance tests for the base ISA (RV32I) and the implemented extensions (M, C, Zicsr). The instructions on running Compliance tests using RISCOF framework are given in [verif](/verif/) directory.
 
-    fusesoc run --target=verilator_tb --build servant --memsize=8388608 --compressed=1
-
-Download the tests repo
-
-    git clone --branch 2.7.4 https://github.com/riscv-non-isa/riscv-arch-test.git
-
-To run the RISC-V compliance tests, we need to supply the SERV-specific support files and point the test suite to where it can find a target to run (i.e. the previously built Verilator model)
-
-Run the compliance tests
-
-    cd riscv-arch-test && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=I TARGET_SIM=$WORKSPACE/build/servant_1.2.0/verilator_tb-verilator/Vservant_sim
-
-The above will run all tests in the rv32i test suite. Since SERV also implement the `M`, `C`, `privilege` and `Zifencei` extensions, these can also be tested by choosing any of them instead of `I` as the `RISCV_DEVICE` variable.
-
-## Run on hardware
-
-The servant SoC has been ported to an increasing number of different FPGA boards. To see all currently supported targets run
-
-    fusesoc core show servant
-
-By default, these targets have the program memory preloaded with a small Zephyr hello world example that writes its output on a UART pin. Don't forget to install the appropriate toolchain (e.g. icestorm, Vivado, Quartus...) and add to your PATH
-
-Some targets also depend on functionality in the FuseSoC base library (fusesoc-cores). Running `fusesoc library list` should tell you if fusesoc-cores is already available. If not, add it to your workspace with
-
-    fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
-
-Now we're ready to build. Note, for all the cases below, it's possible to run with `--memfile=$SERV/sw/blinky.hex`
-(or any other suitable program) as the last argument to preload the LED blink example
-instead of hello world.
-
-### TinyFPGA BX
-
-Pin A6 is used for UART output with 115200 baud rate.
-
-    fusesoc run --target=tinyfpga_bx servant
-    tinyprog --program build/servant_1.0.1/tinyfpga_bx-icestorm/servant_1.0.1.bin
-
-### Icebreaker
-
-Pin 9 is used for UART output with 57600 baud rate.
-
-    fusesoc run --target=icebreaker servant
-
-### Nexys 2
-
-Pmod pin JA1 is conntected to UART tx with 57600 baud rate. A USB to TTL connector is used to display to hello world message on the serial monitor. 
-(To use blinky.hex change L15 to J14 (led[0]) in data/nexys_2.ucf).
-
-    fusesoc run --target=nexys_2_500 servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
-
-
-### iCESugar
-
-Pin 6 is used for UART output with 115200 baud rate. Thanks to the onboard
-debugger, you can just connect the USB Type-C connector to the PC, and a
-serial console will show up.
-
-    fusesoc run --target=icesugar servant
-
-### OrangeCrab R0.2
-
-Pin D1 is used for UART output with 115200 baud rate.
-
-    fusesoc run --target=orangecrab_r0.2 servant
-    dfu-util -d 1209:5af0 -D build/servant_1.2.0/orangecrab_r0.2-trellis/servant_1.2.0.bit
-
-### Arty A7 35T
-
-Pin D10 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
-blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
-
-    fusesoc run --target=arty_a7_35t servant
-
-### Chameleon96 (Arrow 96 CV SoC Board)
-
-FPGA Pin W14 (1V8, pin 5 low speed connector) is used for UART Tx output with 115200 baud rate. No reset key. Yellow Wifi led is q output.
-
-    fusesoc run --target=chameleon96 servant
-
-### DE0 Nano
-
-FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rate. DE0 Nano needs an external 3.3V UART to connect to this pin
-
-    fusesoc run --target=de0_nano servant
-
-### DE10 Nano
-
-FPGA Pin Y15 (Connector JP7, pin 1) is used for UART output with 57600 baud rate. DE10 Nano needs an external 3.3V UART to connect to this pin
-
-    fusesoc run --target=de10_nano servant
-
-### DECA development kit
-
-FPGA Pin W18 (Pin 3 P8 connector) is used for UART output with 57600 baud rate. Key 0 is reset and Led 0 q output.
-
-    fusesoc run --target=deca servant
-
-### EBAZ4205 'Development' Board
-
-Pin B20 is used for UART output with 57600 baud rate. To use `blinky.hex`
-change B20 to W14 (red led) in `data/ebaz4205.xdc` file).
-
-    fusesoc run --target=ebaz4205 servant
-
-    fusesoc run --target=ebaz4205 servant --memfile=$SERV/sw/blinky.hex
-
-Reference: https://github.com/fusesoc/blinky#ebaz4205-development-board
-
-### SoCKit development kit
-
-FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 57600 baud rate.
-
-    fusesoc run --target=sockit servant
-
-### Saanlima Pipistrello (Spartan6 LX45)
-
-Pin A10 (usb_data<1>) is used for UART output with 57600 baud rate (to use
-blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).
-
-    fusesoc run --target=pipistrello servant
-
-### Alhambra II
-
-Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.
-
-    fusesoc run --target=alhambra servant
-    iceprog -d i:0x0403:0x6010:0 build/servant_1.0.1/alhambra-icestorm/servant_1.0.1.bin
-
-### iCEstick
-
-Pin 95 is used as the GPIO output which is connected to the board's green LED. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
-
-    fusesoc run --target=icestick servant
-    iceprog build/servant_1.2.0/icestick-icestorm/servant_1.2.0.bin
-
-### Nandland Go Board
-
-Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
-
-    fusesoc run --target=go_board servant
-    iceprog build/servant_1.2.0/go_board-icestorm/servant_1.2.0.bin
-
-### Alinx ax309 (Spartan6 LX9)
-
-Pin D12 (the on-board RS232 TX pin) is used for UART output with 115200 baud rate and wired to Pin P4 (LED0).
-
-    fusesoc run --target=ax309 servant
 
 ## Other targets
 
@@ -256,7 +158,7 @@ This will synthesize for the default Vivado part. To synthesise for a specific d
 
 SERV, or rather the Servant SoC, can run the [Zephyr RTOS](https://www.zephyrproject.org). The Servant-specific drivers and BSP is located in the zephyr subdirectory of the SERV repository. In order to use Zephyr on Servant, a project directory structure must be set up that allows Zephyr to load the Servant-specific files as a module.
 
-First, the Zephyr SDK and the "west" build too must be installed. The [Zephyr getting started guide](https://docs.zephyrproject.org/latest/getting_started/index.html) describes these steps in more detail.
+First, the Zephyr SDK and the "west" build tool must be installed. The [Zephyr getting started guide](https://docs.zephyrproject.org/latest/getting_started/index.html) describes these steps in more detail.
 
 Assuming that SERV was installed into `$WORKSPACE/fusesoc_libraries/serv` as per the prerequisites, run the following command to make the workspace also work as a Zephyr workspace.
 
@@ -296,8 +198,3 @@ Don't feed serv any illegal instructions after midnight. Many logic expressions 
 The bus interface is kind of Wishbone, but with most signals removed. There's an important difference though. Don't send acks on the instruction or data buses unless serv explicitly asks for something by raising its cyc signal. Otherwise serv becomes very confused.
 
 Don't go changing the clock frequency on a whim when running Zephyr. Or well, it's ok I guess, but since the UART is bitbanged, this will change the baud rate as well. As of writing, the UART is running at 115200 baud rate when the CPU is 32 MHz. There are two NOPs in the driver to slow it down a bit, so if those are removed I think it could achieve baud rate 115200 on a 24MHz clock.. in case someone wants to try
-
-## TODO
-
-- Applications have to be preloaded to RAM at compile-time
-- Make it faster and smaller

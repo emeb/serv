@@ -6,9 +6,9 @@ module serv_rf_top
         COMPRESSED=0: Disable the compressed decoder and does not allow the misaligned jump of pc
     */
     parameter [0:0] COMPRESSED = 0,
-    /*  
-      ALIGN = 1: Fetch the aligned instruction by making two bus transactions if the misaligned address 
-      is given to the instruction bus.  
+    /*
+      ALIGN = 1: Fetch the aligned instruction by making two bus transactions if the misaligned address
+      is given to the instruction bus.
     */
     parameter [0:0] ALIGN = COMPRESSED,
     /* Multiplication and Division Unit
@@ -27,8 +27,10 @@ module serv_rf_top
                  restart execution from the instruction at RESET_PC
      */
     parameter RESET_STRATEGY = "MINI",
+    parameter [0:0] DEBUG = 1'b0,
     parameter WITH_CSR = 1,
-    parameter RF_WIDTH = 2,
+    parameter W        = 1,
+    parameter RF_WIDTH = W * 2,
 	parameter RF_L2D   = $clog2((32+(WITH_CSR*4))*32/RF_WIDTH))
   (
    input wire 	      clk,
@@ -68,7 +70,7 @@ module serv_rf_top
    output wire 	      o_dbus_cyc,
    input wire [31:0]  i_dbus_rdt,
    input wire 	      i_dbus_ack,
-   
+
    // Extension
    output wire [31:0] o_ext_rs1,
    output wire [31:0] o_ext_rs2,
@@ -77,7 +79,7 @@ module serv_rf_top
    input  wire        i_ext_ready,
    // MDU
    output wire        o_mdu_valid);
-   
+
    localparam CSR_REGS = WITH_CSR*4;
 
    wire 	      rf_wreq;
@@ -86,24 +88,26 @@ module serv_rf_top
    wire [4+WITH_CSR:0] wreg1;
    wire 	      wen0;
    wire 	      wen1;
-   wire 	      wdata0;
-   wire 	      wdata1;
+   wire [W-1:0]	      wdata0;
+   wire [W-1:0]	      wdata1;
    wire [4+WITH_CSR:0] rreg0;
    wire [4+WITH_CSR:0] rreg1;
    wire 	      rf_ready;
-   wire 	      rdata0;
-   wire 	      rdata1;
+   wire [W-1:0]	      rdata0;
+   wire [W-1:0]	      rdata1;
 
    wire [RF_L2D-1:0]   waddr;
    wire [RF_WIDTH-1:0] wdata;
    wire 	       wen;
    wire [RF_L2D-1:0]   raddr;
+   wire 	       ren;
    wire [RF_WIDTH-1:0] rdata;
 
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
        .reset_strategy (RESET_STRATEGY),
-       .csr_regs (CSR_REGS))
+       .csr_regs (CSR_REGS),
+       .W(W))
    rf_ram_if
      (.i_clk    (clk),
       .i_rst    (i_rst),
@@ -124,6 +128,7 @@ module serv_rf_top
       .o_wdata  (wdata),
       .o_wen    (wen),
       .o_raddr  (raddr),
+      .o_ren    (ren),
       .i_rdata  (rdata));
 
    serv_rf_ram
@@ -135,6 +140,7 @@ module serv_rf_top
       .i_wdata (wdata),
       .i_wen   (wen),
       .i_raddr (raddr),
+      .i_ren    (ren),
       .o_rdata (rdata));
 
    serv_top
@@ -142,9 +148,11 @@ module serv_rf_top
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
+       .DEBUG (DEBUG),
        .MDU(MDU),
        .COMPRESSED(COMPRESSED),
-       .ALIGN(ALIGN))
+       .ALIGN(ALIGN),
+       .W(W))
    cpu
      (
       .clk      (clk),
@@ -199,7 +207,7 @@ module serv_rf_top
       .o_dbus_cyc   (o_dbus_cyc),
       .i_dbus_rdt   (i_dbus_rdt),
       .i_dbus_ack   (i_dbus_ack),
-      
+
       //Extension
       .o_ext_funct3 (o_ext_funct3),
       .i_ext_ready  (i_ext_ready),
