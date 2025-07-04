@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Servant : FPGA Reference platform &#8212; SERV  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="https://wavedrom.com/skins/default.js"></script>
+    <script src="https://wavedrom.com/wavedrom.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="servant-fpga-reference-platform">
+<h1>Servant : FPGA Reference platform<a class="headerlink" href="#servant-fpga-reference-platform" title="Link to this heading">¶</a></h1>
+<figure class="align-default" id="id1">
+<img alt="_images/servant.png" src="_images/servant.png" />
+<figcaption>
+<p><span class="caption-text">Servant FPGA Reference platform</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>SERV comes with a small FPGA-focused reference platform called Servant, which is capable of running Zephyr RTOS, the regression test suite and other software. The platform consists of SERV, a timer, memory and a 1-bit GPIO output pin.</p>
+<section id="available-targets">
+<h2>Available targets<a class="headerlink" href="#available-targets" title="Link to this heading">¶</a></h2>
+<p>The servant SoC has been ported to an increasing number of different FPGA boards and is easy to modify for new targets. To see all currently supported targets run:</p>
+<blockquote>
+<div><p>fusesoc core show servant</p>
+</div></blockquote>
+<p>By default, these targets have the program memory preloaded with a small Zephyr hello world example that writes its output on a UART pin. Don’t forget to install the appropriate toolchain (e.g. icestorm, Vivado, Quartus…) and add to your PATH</p>
+<p>Some targets also depend on functionality in the FuseSoC base library (fusesoc-cores). Running <cite>fusesoc library list</cite> should tell you if fusesoc-cores is already available. If not, add it to your workspace with</p>
+<blockquote>
+<div><p>fusesoc library add fusesoc-cores <a class="reference external" href="https://github.com/fusesoc/fusesoc-cores">https://github.com/fusesoc/fusesoc-cores</a></p>
+</div></blockquote>
+<p>Now we’re ready to build. Note, for all the cases below, it’s possible to run with <cite>–memfile=$SERV/sw/blinky.hex</cite>
+(or any other suitable program) as the last argument to preload the LED blink example
+instead of hello world.</p>
+<section id="ac701">
+<h3>AC701<a class="headerlink" href="#ac701" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=ac701 servant</p>
+</div></blockquote>
+</section>
+<section id="alchistry-au">
+<h3>Alchistry AU<a class="headerlink" href="#alchistry-au" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=alchistry_au servant</p>
+</div></blockquote>
+</section>
+<section id="alhambra-ii">
+<h3>Alhambra II<a class="headerlink" href="#alhambra-ii" title="Link to this heading">¶</a></h3>
+<p>Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.</p>
+<blockquote>
+<div><p>fusesoc run –target=alhambra servant
+iceprog -d i:0x0403:0x6010:0 build/servant_1.0.1/alhambra-icestorm/servant_1.0.1.bin</p>
+</div></blockquote>
+</section>
+<section id="alinx-ax309-spartan6-lx9">
+<h3>Alinx ax309 (Spartan6 LX9)<a class="headerlink" href="#alinx-ax309-spartan6-lx9" title="Link to this heading">¶</a></h3>
+<p>Pin D12 (the on-board RS232 TX pin) is used for UART output with 115200 baud rate and wired to Pin P4 (LED0).</p>
+<blockquote>
+<div><p>fusesoc run –target=ax309 servant</p>
+</div></blockquote>
+</section>
+<section id="arty-a7-35t">
+<h3>Arty A7 35T<a class="headerlink" href="#arty-a7-35t" title="Link to this heading">¶</a></h3>
+<p>Pin D10 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
+blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).</p>
+<blockquote>
+<div><p>fusesoc run –target=arty_a7_35t servant</p>
+</div></blockquote>
+</section>
+<section id="arty-s7-50t">
+<h3>Arty S7 50T<a class="headerlink" href="#arty-s7-50t" title="Link to this heading">¶</a></h3>
+<p>Pin R12 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
+blinky.hex change R12 to E18 (led[4]) in data/arty_s7_50t.xdc).</p>
+<blockquote>
+<div><p>fusesoc run –target=arty_s7_50t servant</p>
+</div></blockquote>
+</section>
+<section id="chameleon96-arrow-96-cv-soc-board">
+<h3>Chameleon96 (Arrow 96 CV SoC Board)<a class="headerlink" href="#chameleon96-arrow-96-cv-soc-board" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin W14 (1V8, pin 5 low speed connector) is used for UART Tx output with 115200 baud rate. No reset key. Yellow Wifi led is q output.</p>
+<blockquote>
+<div><p>fusesoc run –target=chameleon96 servant</p>
+</div></blockquote>
+</section>
+<section id="cmod-a7-35t">
+<h3>CMOD A7 35t<a class="headerlink" href="#cmod-a7-35t" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin J18 is used for UART output with 57600 baud rate. btn0 is used for reset.</p>
+<blockquote>
+<div><p>fusesoc run –target=cmod_a7_35t servant</p>
+</div></blockquote>
+</section>
+<section id="cyc1000">
+<h3>CYC1000<a class="headerlink" href="#cyc1000" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=cyc1000 servant</p>
+</div></blockquote>
+</section>
+<section id="de0-nano">
+<h3>DE0 Nano<a class="headerlink" href="#de0-nano" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rate. DE0 Nano needs an external 3.3V UART to connect to this pin</p>
+<blockquote>
+<div><p>fusesoc run –target=de0_nano servant</p>
+</div></blockquote>
+</section>
+<section id="de10-nano">
+<h3>DE10 Nano<a class="headerlink" href="#de10-nano" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin Y15 (Connector JP7, pin 1) is used for UART output with 57600 baud rate. DE10 Nano needs an external 3.3V UART to connect to this pin</p>
+<blockquote>
+<div><p>fusesoc run –target=de10_nano servant</p>
+</div></blockquote>
+</section>
+<section id="de1-soc-revf">
+<h3>DE1 SoC revF<a class="headerlink" href="#de1-soc-revf" title="Link to this heading">¶</a></h3>
+<p>FPGA PIN_AC18 (Connector GPIO0, pin 0) is used for UART output with 57600 baud rate. DE1 SoC revF needs an external 3.3V UART to connect to this pin. The UART pin has not been tested.</p>
+<blockquote>
+<div><p>fusesoc run –target=de1_soc_revF servant</p>
+</div></blockquote>
+</section>
+<section id="deca-development-kit">
+<h3>DECA development kit<a class="headerlink" href="#deca-development-kit" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin W18 (Pin 3 P8 connector) is used for UART output with 57600 baud rate. Key 0 is reset and Led 0 q output.</p>
+<blockquote>
+<div><p>fusesoc run –target=deca servant</p>
+</div></blockquote>
+</section>
+<section id="ebaz4205-development-board">
+<h3>EBAZ4205 ‘Development’ Board<a class="headerlink" href="#ebaz4205-development-board" title="Link to this heading">¶</a></h3>
+<p>Pin B20 is used for UART output with 57600 baud rate. To use <cite>blinky.hex</cite>
+change B20 to W14 (red led) in <cite>data/ebaz4205.xdc</cite> file).</p>
+<blockquote>
+<div><p>fusesoc run –target=ebaz4205 servant</p>
+<p>fusesoc run –target=ebaz4205 servant –memfile=$SERV/sw/blinky.hex</p>
+</div></blockquote>
+<p>Reference: <a class="reference external" href="https://github.com/fusesoc/blinky#ebaz4205-development-board">https://github.com/fusesoc/blinky#ebaz4205-development-board</a></p>
+</section>
+<section id="ecp5-evn">
+<h3>ECP5 EVN<a class="headerlink" href="#ecp5-evn" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=ecp5_evn servant</p>
+</div></blockquote>
+</section>
+<section id="icebreaker">
+<h3>Icebreaker<a class="headerlink" href="#icebreaker" title="Link to this heading">¶</a></h3>
+<p>Pin 9 is used for UART output with 57600 baud rate.</p>
+<blockquote>
+<div><p>fusesoc run –target=icebreaker servant</p>
+</div></blockquote>
+</section>
+<section id="icestick">
+<h3>iCEstick<a class="headerlink" href="#icestick" title="Link to this heading">¶</a></h3>
+<p>Pin 95 is used as the GPIO output which is connected to the board’s green LED. Due to this board’s limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.</p>
+<blockquote>
+<div><p>fusesoc run –target=icestick servant
+iceprog build/servant_1.3.0/icestick-icestorm/servant_1.3.0.bin</p>
+</div></blockquote>
+</section>
+<section id="icesugar">
+<h3>iCESugar<a class="headerlink" href="#icesugar" title="Link to this heading">¶</a></h3>
+<p>Pin 6 is used for UART output with 115200 baud rate. Thanks to the onboard
+debugger, you can just connect the USB Type-C connector to the PC, and a
+serial console will show up.</p>
+<blockquote>
+<div><p>fusesoc run –target=icesugar servant</p>
+</div></blockquote>
+</section>
+<section id="ice-v-wireless">
+<h3>ICE-V Wireless<a class="headerlink" href="#ice-v-wireless" title="Link to this heading">¶</a></h3>
+<p>Pin 9 is used for UART output with 57600 baud rate.</p>
+<blockquote>
+<div><p>fusesoc run –target=icev_wireless servant</p>
+<p>iceprog build/servant_1.3.0/icestick-icestorm/servant_1.3.0.bin</p>
+</div></blockquote>
+</section>
+<section id="gmm7550">
+<h3>GMM7550<a class="headerlink" href="#gmm7550" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=gmm7550 servant</p>
+</div></blockquote>
+</section>
+<section id="lx9-microboard">
+<h3>LX9 Microboard<a class="headerlink" href="#lx9-microboard" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=lx9_microboard servant</p>
+</div></blockquote>
+</section>
+<section id="machdyne-kolibri">
+<h3>Machdyne Kolibri<a class="headerlink" href="#machdyne-kolibri" title="Link to this heading">¶</a></h3>
+<p>Pin B1 is used for UART output with 115200 baud rate. The serial port on Kolibri is accessible as a USB-CDC device.</p>
+<blockquote>
+<div><p>fusesoc run –target=machdyne_kolibri servant</p>
+<p>ldprog -Ks build/servant_1.3.0/machdyne_kolibri-icestorm/servant_1.3.0.bin</p>
+</div></blockquote>
+</section>
+<section id="max10-10m08-evaluation-kit">
+<h3>MAX10 10M08 Evaluation Kit<a class="headerlink" href="#max10-10m08-evaluation-kit" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin 75 (Arduino_IO01 J5 pin 7) is used for UART output with 57600 baud rate. SW1 is reset and Led 1 q output.</p>
+<blockquote>
+<div><p>fusesoc run –target=max10_10m08evk servant</p>
+</div></blockquote>
+</section>
+<section id="nandland-go-board">
+<h3>Nandland Go Board<a class="headerlink" href="#nandland-go-board" title="Link to this heading">¶</a></h3>
+<p>Pin 56 is used as the GPIO output which is connected to the board’s LED1. Due to this board’s limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.</p>
+<blockquote>
+<div><p>fusesoc run –target=go_board servant
+iceprog build/servant_1.3.0/go_board-icestorm/servant_1.3.0.bin</p>
+</div></blockquote>
+</section>
+<section id="nexys-2">
+<h3>Nexys 2<a class="headerlink" href="#nexys-2" title="Link to this heading">¶</a></h3>
+<p>Pmod pin JA1 is connected to UART tx with 57600 baud rate. A USB to TTL connector is used to display to hello world message on the serial monitor.
+(To use blinky.hex change L15 to J14 (led[0]) in data/nexys_2.ucf).</p>
+<blockquote>
+<div><p>fusesoc run –target=nexys_2_500 servant –uart_baudrate=57600 –firmware=$SERV/sw/zephyr_hello.hex</p>
+</div></blockquote>
+</section>
+<section id="nexys-a7">
+<h3>Nexys A7<a class="headerlink" href="#nexys-a7" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=nexys_a7 servant</p>
+</div></blockquote>
+</section>
+<section id="orangecrab-r0-2">
+<h3>OrangeCrab R0.2<a class="headerlink" href="#orangecrab-r0-2" title="Link to this heading">¶</a></h3>
+<p>Pin D1 is used for UART output with 115200 baud rate.</p>
+<blockquote>
+<div><p>fusesoc run –target=orangecrab_r0.2 servant
+dfu-util -d 1209:5af0 -D build/servant_1.3.0/orangecrab_r0.2-trellis/servant_1.3.0.bit</p>
+</div></blockquote>
+</section>
+<section id="polarfire-splash-kit">
+<h3>PolarFire Splash Kit<a class="headerlink" href="#polarfire-splash-kit" title="Link to this heading">¶</a></h3>
+<p>Pin R5 is used for UART output with a 115200 baud rate, this is routed through
+the onboard FTDI transceiver. LED1 (Pin P7) serves as the generic GPIO.</p>
+<p>Pin P8 is used as the GPIO heartbeat with a 1Hz frequency and is connected to
+the board’s LED2.</p>
+<p>Pin N4 (user reset) is used for the reset</p>
+<blockquote>
+<div><p>fusesoc run –target=polarfire_splashkit servant –memfile=$SERV/sw/zephyr_hello.hex</p>
+</div></blockquote>
+</section>
+<section id="saanlima-pipistrello-spartan6-lx45">
+<h3>Saanlima Pipistrello (Spartan6 LX45)<a class="headerlink" href="#saanlima-pipistrello-spartan6-lx45" title="Link to this heading">¶</a></h3>
+<p>Pin A10 (usb_data&lt;1&gt;) is used for UART output with 57600 baud rate (to use
+blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).</p>
+<blockquote>
+<div><p>fusesoc run –target=pipistrello servant</p>
+</div></blockquote>
+</section>
+<section id="sockit-development-kit">
+<h3>SoCKit development kit<a class="headerlink" href="#sockit-development-kit" title="Link to this heading">¶</a></h3>
+<p>FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 57600 baud rate.</p>
+<blockquote>
+<div><p>fusesoc run –target=sockit servant</p>
+</div></blockquote>
+</section>
+<section id="trenz-electronic-te0802">
+<h3>Trenz Electronic TE0802<a class="headerlink" href="#trenz-electronic-te0802" title="Link to this heading">¶</a></h3>
+<p>PMOD A marked J5, pin two, on the board is used for UART output with 115200 baud rate.</p>
+<blockquote>
+<div><p>fusesoc run –target=te0802 servant</p>
+</div></blockquote>
+</section>
+<section id="tinyfpga-bx">
+<h3>TinyFPGA BX<a class="headerlink" href="#tinyfpga-bx" title="Link to this heading">¶</a></h3>
+<p>Pin A6 is used for UART output with 115200 baud rate.</p>
+<blockquote>
+<div><p>fusesoc run –target=tinyfpga_bx servant
+tinyprog –program build/servant_1.0.1/tinyfpga_bx-icestorm/servant_1.0.1.bin</p>
+</div></blockquote>
+</section>
+<section id="ulx3s">
+<h3>ULX3S<a class="headerlink" href="#ulx3s" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=ulx3s servant</p>
+</div></blockquote>
+</section>
+<section id="upduino2">
+<h3>Upduino2<a class="headerlink" href="#upduino2" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=upduino2 servant</p>
+</div></blockquote>
+</section>
+<section id="zcu106">
+<h3>zcu106<a class="headerlink" href="#zcu106" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><p>fusesoc run –target=zcu106 servant</p>
+</div></blockquote>
+</section>
+</section>
+<section id="porting-servant-to-a-new-target">
+<h2>Porting Servant to a new target<a class="headerlink" href="#porting-servant-to-a-new-target" title="Link to this heading">¶</a></h2>
+<p>Mostly any FPGA board can be used to run the Servant SoC. In its simplest form it just needs an FPGA with a clock input and an output that can be used to connect an UART or a LED.</p>
+<p>The porting process consists of FIXME steps.
+We will use <cite>&lt;name&gt;</cite> as a placeholder for the name of the FPGA board.
+1. Locate the pins used for clock input and for the outputs. Outputs should preferably be both a LED and an UART, but either works if not both are available. Optionally, locate an input pin connected to the reset as well. This is not required, but can be handy.
+2. Write a pin constraints file with your located pins in the format of the FPGA toolchain you intend to use. For Vivado this would be an .xdc file. For Quartus a .tcl file, for nextpnr a .pcf file and so on. Save this as <cite>data/&lt;name&gt;.{pcf,ucf,xdc…}</cite> in the SERV repo.
+3. Create a clock generation file
+4. Create a top-level
+5. Create a fileset
+6. Create a target</p>
+</section>
+</section>
+
+    <script type="text/javascript">
+        function init() {
+            WaveDrom.ProcessAll();
+        }
+        window.onload = init;
+    </script>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">SERV</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="datasheet.html">Datasheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internals.html">Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reservoir.html">Building systems with SERV</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020, Olof Kindgren.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/servant.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

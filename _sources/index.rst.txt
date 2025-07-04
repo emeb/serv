@@ -1,11 +1,13 @@
+################
 SERV user manual
-================
+################
 
 Welcome to the user manual of the award-winning SERV, the world's smallest RISC-V CPU.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Contents:
 
-   interface.rst
-   modules.rst
+   datasheet.rst
+   internals.rst
+   reservoir.rst
